@@ -1,5 +1,6 @@
-package com.example.ebankbackend.entities;
+package com.example.ebankbackend.dtos;
 
+import com.example.ebankbackend.entities.Compte;
 import com.example.ebankbackend.enums.TypeOperation;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,16 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-@Entity
-@Data @NoArgsConstructor @AllArgsConstructor
-public class Operation {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+@Data
+public class OperationDTO {
     private Long id;
     private Date dateOperation;
     private double montant;
-    @Enumerated(EnumType.STRING)
     private TypeOperation typeOperation;
-    @ManyToOne
-    private Compte compte;
     private  String description;
 }
