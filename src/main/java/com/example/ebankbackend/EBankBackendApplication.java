@@ -21,6 +21,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 import java.util.Date;
 import java.util.List;
@@ -29,27 +33,34 @@ import java.util.stream.Stream;
 
 @SpringBootApplication
 public class EBankBackendApplication {
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
 
     public static void main(String[] args) {
         SpringApplication.run(EBankBackendApplication.class, args);
     }
 
+
     @Bean
     @Transactional
-    CommandLineRunner commandLineRunner(CompteService compteService){
+    CommandLineRunner commandLineRunner(CompteService compteService,JdbcUserDetailsManager jdbcUserDetailsManager){
+        PasswordEncoder passwordEncoder=passwordEncoder();
         return args -> {
             Stream.of("Malick","ADAMA","MOUHAMED").forEach(name->{
                         ClientDTO client =new ClientDTO();
                         client.setName(name);
-                        client.setEmail(name+"gmail.com");
-                        compteService.creerClient(client);
+                        client.setEmail(name+"@gmail.com");
+                compteService.creerClient(client);
+                /*jdbcUserDetailsManager.createUser(
+                        User.withUsername(client.getEmail()).password(passwordEncoder.encode("12345")).roles("USER","ADMIN").build()
+                );*/
                     });
             compteService.listesClients().forEach(client -> {
                 try {
                     compteService.creerCompteCourant(Math.random()*90000,9000, client.getId());
                     compteService.creerCompteEpargne(Math.random()*120000,5.5,client.getId());
-
-
 
                 } catch (ClientNonTrouve e) {
                     e.printStackTrace();
@@ -73,10 +84,32 @@ public class EBankBackendApplication {
             }
         };
     }
+   // @Bean
+    CommandLineRunner cml(JdbcUserDetailsManager jdbcUserDetailsManager){
+
+        PasswordEncoder passwordEncoder = passwordEncoder();
+        return args -> {
+            jdbcUserDetailsManager.createUser(
+                    User.withUsername("user3").password(passwordEncoder.encode("12345")).roles("USER").build()
+
+            );
+            System.out.println(passwordEncoder.encode("12345"));
+            jdbcUserDetailsManager.createUser(
+                    User.withUsername("user2").password(passwordEncoder.encode("12345")).roles("USER").build()
+            );
+            jdbcUserDetailsManager.createUser(
+                    User.withUsername("admin1").password(passwordEncoder.encode("12345")).roles("USER","ADMIN").build()
+            );
+
+
+        };
+    }
     //@Bean
     CommandLineRunner start(ClientRepository clientRepository,
                             CompteRepository compteRepository,
-                            OperationRepository operationRepository){
+                            OperationRepository operationRepository,
+                            JdbcUserDetailsManager jdbcUserDetailsManager){
+        PasswordEncoder passwordEncoder=passwordEncoder();
         return  args -> {
             Stream.of("Assane","Yacine","Malick").forEach(name->{
                Client client=new Client();
