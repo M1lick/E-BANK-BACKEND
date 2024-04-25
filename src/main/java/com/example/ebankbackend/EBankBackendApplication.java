@@ -8,15 +8,11 @@ import com.example.ebankbackend.entities.*;
 import com.example.ebankbackend.enums.StatusCompte;
 import com.example.ebankbackend.enums.TypeOperation;
 import com.example.ebankbackend.exceptions.ClientNonTrouve;
-import com.example.ebankbackend.exceptions.CompteNonTrouverException;
-import com.example.ebankbackend.exceptions.SoldeInsuffisantException;
 import com.example.ebankbackend.repositories.ClientRepository;
 import com.example.ebankbackend.repositories.CompteRepository;
 import com.example.ebankbackend.repositories.OperationRepository;
-import com.example.ebankbackend.services.BankService;
 import com.example.ebankbackend.services.CompteService;
 import jakarta.transaction.Transactional;
-import org.apache.catalina.Service;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,14 +41,24 @@ public class EBankBackendApplication {
 
     @Bean
     @Transactional
-    CommandLineRunner commandLineRunner(CompteService compteService,JdbcUserDetailsManager jdbcUserDetailsManager){
+    CommandLineRunner commandLineRunner(CompteService compteService /*, JdbcUserDetailsManager jdbcUserDetailsManager*/ ){
         PasswordEncoder passwordEncoder=passwordEncoder();
         return args -> {
             Stream.of("Malick","ADAMA","MOUHAMED").forEach(name->{
                         ClientDTO client =new ClientDTO();
                         client.setName(name);
                         client.setEmail(name+"@gmail.com");
+                        client.setPassword("12345");
                 compteService.creerClient(client);
+                compteService.addnewRole("ROLE_ADMIN");
+                compteService.addnewRole("ROLE_USER");
+                try {
+                    compteService.addRoleToClient(name+"@gmail.com","ADMIN");
+                    compteService.addRoleToClient(name+"@gmail.com","USER");
+
+                } catch (ClientNonTrouve e) {
+                    throw new RuntimeException(e);
+                }
                 /*jdbcUserDetailsManager.createUser(
                         User.withUsername(client.getEmail()).password(passwordEncoder.encode("12345")).roles("USER","ADMIN").build()
                 );*/

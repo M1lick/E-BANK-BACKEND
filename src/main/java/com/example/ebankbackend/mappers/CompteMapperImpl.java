@@ -1,13 +1,7 @@
 package com.example.ebankbackend.mappers;
 
-import com.example.ebankbackend.dtos.ClientDTO;
-import com.example.ebankbackend.dtos.CompteCourantDTO;
-import com.example.ebankbackend.dtos.CompteEpargneDTO;
-import com.example.ebankbackend.dtos.OperationDTO;
-import com.example.ebankbackend.entities.Client;
-import com.example.ebankbackend.entities.CompteCourant;
-import com.example.ebankbackend.entities.CompteEpargne;
-import com.example.ebankbackend.entities.Operation;
+import com.example.ebankbackend.dtos.*;
+import com.example.ebankbackend.entities.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +18,16 @@ public class CompteMapperImpl {
         Client client=new Client();
         BeanUtils.copyProperties(clientDTO,client);
         return client;
+    }
+    public ClientRoleDTO fromClientRole(ClientRole clientRole){
+        ClientRoleDTO clientRoleDTO=new ClientRoleDTO();
+        BeanUtils.copyProperties(clientRole,clientRoleDTO);
+        return clientRoleDTO;
+    }
+    public ClientRole fromClientRoleDTO(ClientRoleDTO clientRoleDTO){
+        ClientRole clientRole=new ClientRole();
+        BeanUtils.copyProperties(clientRoleDTO,clientRole);
+        return clientRole;
     }
     public CompteEpargneDTO fromCompteEpargne(CompteEpargne compteEpargne){
         CompteEpargneDTO compteEpargneDTO=new CompteEpargneDTO();

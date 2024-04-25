@@ -1,10 +1,14 @@
 package com.example.ebankbackend.security;
 
+import com.example.ebankbackend.services.UserdDetailsServiceImp;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import lombok.AllArgsConstructor;
 import org.hibernate.type.descriptor.java.Immutability;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,13 +43,15 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+    @Autowired
+    private UserdDetailsServiceImp userdDetailsServiceImp;
     @Value("${Jwt.secret}")
     private String secret;
-    @Bean
+   // @Bean
     public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource){
         return  new JdbcUserDetailsManager(dataSource);
     }
-    //@Bean
+   // @Bean
     public InMemoryUserDetailsManager inMemoryUserDetailsManager(){
         PasswordEncoder passwordEncoder= passwordEncoder();
         return new InMemoryUserDetailsManager(
@@ -63,10 +69,11 @@ public class SecurityConfig {
                 .sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf->csrf.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(ar->ar.requestMatchers("/auth/login/**").permitAll())
+                .authorizeHttpRequests(ar->ar.requestMatchers("/auth/login").permitAll())
                 .authorizeHttpRequests(ar->ar.anyRequest().authenticated())
                 //.httpBasic(Customizer.withDefaults())
                 .oauth2ResourceServer(oa->oa.jwt(Customizer.withDefaults()))
+                .userDetailsService(userdDetailsServiceImp)
                 .build();
 
     }
@@ -83,7 +90,8 @@ public class SecurityConfig {
 
     }
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService){
+    @Primary
+    public AuthenticationManager authenticationManager(UserdDetailsServiceImp userDetailsService ){
         DaoAuthenticationProvider daoAuthenticationProvider=new DaoAuthenticationProvider();
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
@@ -101,3 +109,4 @@ public class SecurityConfig {
         return source;
     }
 }
+

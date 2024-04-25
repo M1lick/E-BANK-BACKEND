@@ -13,6 +13,9 @@ import java.util.List;
 
 public interface CompteService {
     ClientDTO creerClient(ClientDTO clientDTO);
+    ClientRoleDTO addnewRole(String role);
+    void addRoleToClient(String email , String role) throws ClientNonTrouve;
+    void deletRoleFromClient(String email ,String role) throws ClientNonTrouve;
     CompteCourantDTO creerCompteCourant(double soldeInitiale, double decouver, Long IdClient) throws ClientNonTrouve;
     CompteEpargneDTO creerCompteEpargne(double soldeInitiale, double tauxInteret, Long IdClient) throws ClientNonTrouve;
     List<ClientDTO> listesClients();
@@ -35,4 +38,8 @@ public interface CompteService {
     OperationsHistoryDTO getHistoryOperations(String idCompte, int page, int size) throws CompteNonTrouverException;
 
     List<ClientDTO> searchClient(String keyword);
+
+    ClientDTO loadUserByEmail(String email);
+    // ClientDTO loadUserByUsername(String username);
+
 }

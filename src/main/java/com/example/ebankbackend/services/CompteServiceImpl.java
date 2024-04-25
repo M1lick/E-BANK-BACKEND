@@ -8,15 +8,17 @@ import com.example.ebankbackend.exceptions.CompteNonTrouverException;
 import com.example.ebankbackend.exceptions.SoldeInsuffisantException;
 import com.example.ebankbackend.mappers.CompteMapperImpl;
 import com.example.ebankbackend.repositories.ClientRepository;
+import com.example.ebankbackend.repositories.ClientRoleRepository;
 import com.example.ebankbackend.repositories.CompteRepository;
 import com.example.ebankbackend.repositories.OperationRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Date;
 import java.util.List;
@@ -29,17 +31,66 @@ import java.util.stream.Collectors;
 @Slf4j
 
 public class CompteServiceImpl implements CompteService{
+    private ClientRoleRepository clientRoleRepository;
     private CompteRepository compteRepository;
     private ClientRepository clientRepository;
     private OperationRepository operationRepository;
     private CompteMapperImpl dtoMapper;
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
     @Override
     public ClientDTO creerClient(ClientDTO client) {
         log.info("enregistrement nouveau client");
-        Client clientCreer=clientRepository.save(dtoMapper.fromClientDTO(client));
+        Client clientCreer=dtoMapper.fromClientDTO(client);
+        clientCreer.setPassword(passwordEncoder().encode(clientCreer.getPassword()));
+        clientRepository.save(clientCreer);
         return dtoMapper.fromClient(clientCreer);
+
+    }
+    public ClientRoleDTO addnewRole(String role) {
+        // Créer un nouveau rôle
+        ClientRole clientRole = new ClientRole(role);
+        // Enregistrer le rôle dans la base de données
+        ClientRole savedRole = clientRoleRepository.save(clientRole);
+        // Convertir et retourner le rôle sauvegardé en ClientRoleDTO
+        return dtoMapper.fromClientRole(savedRole);
     }
 
+    @Override
+    public void addRoleToClient(String email, String role) throws ClientNonTrouve {
+        // Récupérer le client par email
+        Client client = clientRepository.findByEmail(email) ;
+        if (client==null)
+            new ClientNonTrouve("Client non trouvé avec l'email: " + email);
+        // Récupérer le rôle par son nom
+        ClientRole clientRole = clientRoleRepository.findByRole(role);
+        if (clientRole == null) {
+            // Si le rôle n'existe pas, créer un nouveau rôle
+            clientRole = new ClientRole(role);
+            clientRole = clientRoleRepository.save(clientRole);
+        }
+        // Ajouter le rôle au client
+        client.getRole().add(clientRole);
+        // Mettre à jour le client dans la base de données
+        clientRepository.save(client);
+    }
+
+    @Override
+    public void deletRoleFromClient(String email, String role) throws ClientNonTrouve {
+        // Récupérer le client par email
+        Client client = clientRepository.findByEmail(email);
+        if(client==null)
+            new ClientNonTrouve("Client non trouvé avec l'email: " + email);
+        // Récupérer le rôle par son nom
+        ClientRole clientRole = clientRoleRepository.findByRole(role);
+        if (clientRole != null) {
+            // Supprimer le rôle du client
+            client.getRole().remove(clientRole);
+            // Mettre à jour le client dans la base de données
+            clientRepository.save(client);
+        }
+    }
     @Override
     public CompteCourantDTO creerCompteCourant(double soldeInitiale, double decouver, Long IdClient) throws ClientNonTrouve {
         Client client=clientRepository.findById(IdClient).orElse(null);
@@ -203,5 +254,11 @@ public class CompteServiceImpl implements CompteService{
         List<ClientDTO> clientDTOS=clients.stream().map(cli->dtoMapper.fromClient(cli))
                 .collect(Collectors.toList());
         return clientDTOS;
+    }
+
+    @Override
+    public ClientDTO loadUserByEmail(String email) {
+        Client client= clientRepository.findByEmail(email);
+        return dtoMapper.fromClient(client);
     }
 }

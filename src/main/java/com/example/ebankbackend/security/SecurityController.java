@@ -1,6 +1,8 @@
 package com.example.ebankbackend.security;
 
 
+import com.example.ebankbackend.entities.Client;
+import com.example.ebankbackend.repositories.ClientRepository;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/auth")
 public class SecurityController {
+    @Autowired
+    private ClientRepository clientRepository;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -48,6 +52,8 @@ public class SecurityController {
                     JwsHeader.with(MacAlgorithm.HS512).build(),
                     jwtClaimsSet
             );
+    //Client client=clientRepository.findByEmail(username);
+    //System.out.println(client);
     String jwt = jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
     return Map.of("access=token",jwt);
 
