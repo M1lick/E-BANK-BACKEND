@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -52,10 +53,20 @@ public class SecurityController {
                     JwsHeader.with(MacAlgorithm.HS512).build(),
                     jwtClaimsSet
             );
-    //Client client=clientRepository.findByEmail(username);
-    //System.out.println(client);
+    //recupreration des info client dont j'ai beson
+    Client client=clientRepository.findByEmail(username);
+    String idCompte=clientRepository.findCompteCC(client.getId());
+    Map<String, String> map = new HashMap<>();
+    map.put("idcompt", idCompte);
+    map.put("k2", client.getName());
     String jwt = jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
-    return Map.of("access=token",jwt);
+    map.put("access=token", jwt);
+
+
+    return Map.of("access=token", jwt ,"idcompt",idCompte ,"name",client.getName());
+    /*
+    String jwt = jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
+    return Map.of("access=token",jwt); */
 
   }
 

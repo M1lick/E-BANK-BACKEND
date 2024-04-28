@@ -44,14 +44,14 @@ public class EBankBackendApplication {
     CommandLineRunner commandLineRunner(CompteService compteService /*, JdbcUserDetailsManager jdbcUserDetailsManager*/ ){
         PasswordEncoder passwordEncoder=passwordEncoder();
         return args -> {
-            Stream.of("Malick","ADAMA","MOUHAMED").forEach(name->{
+            Stream.of("malick","adama","mouhamed").forEach(name->{
                         ClientDTO client =new ClientDTO();
                         client.setName(name);
                         client.setEmail(name+"@gmail.com");
-                        client.setPassword("12345");
+                        client.setPassword("kh9y7-dqfmf");
                 compteService.creerClient(client);
-                compteService.addnewRole("ROLE_ADMIN");
-                compteService.addnewRole("ROLE_USER");
+               // compteService.addnewRole("ROLE_ADMIN");
+                //compteService.addnewRole("ROLE_USER");
                 try {
                     compteService.addRoleToClient(name+"@gmail.com","ADMIN");
                     compteService.addRoleToClient(name+"@gmail.com","USER");
@@ -63,6 +63,7 @@ public class EBankBackendApplication {
                         User.withUsername(client.getEmail()).password(passwordEncoder.encode("12345")).roles("USER","ADMIN").build()
                 );*/
                     });
+            
             compteService.listesClients().forEach(client -> {
                 try {
                     compteService.creerCompteCourant(Math.random()*90000,9000, client.getId());

@@ -12,7 +12,7 @@ public class ClientDTO {
     private String name;
     private String email;
     private String password;
-    private List<String> roleList;
+    private List<ClientRole> role;
     private List<CompteDTO> compteDTOList;
 
 }

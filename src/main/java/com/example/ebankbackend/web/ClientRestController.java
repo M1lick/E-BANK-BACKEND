@@ -38,7 +38,7 @@ public class ClientRestController {
     }
     @PostMapping ("/clients")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    public ClientDTO creerClient(@RequestBody ClientDTO clientDTO){
+    public ClientDTO creerClient(@RequestBody ClientDTO clientDTO) throws ClientNonTrouve {
         return compteService.creerClient(clientDTO);
 
     }

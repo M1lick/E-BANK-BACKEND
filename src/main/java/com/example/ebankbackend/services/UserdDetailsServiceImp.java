@@ -34,20 +34,36 @@ public class UserdDetailsServiceImp implements UserDetailsService {
         /*List<String> roles = client.getRole().stream()
                 .map(ClientRole::getRole)
                 .collect(Collectors.toList());*/
-        client.getRole();
         List<String> roles = client.getRole().stream()
                 .map(clientRole -> clientRole.getRole())
                 .collect(Collectors.toList());
         String[] rolesArray = roles.toArray(new String[roles.size()]);
-        System.out.println(rolesArray);
-        for (String role : rolesArray) {
+        System.out.println(roles);
+        /*for (String role : rolesArray) {
             System.out.println(role);
         }
         String[] cheikhchiffre=rolesArray;
         String rs=String.join(" ROLE_",cheikhchiffre);
 
+
+
         //je recuper le resutat de la liste des roles transformer en String que je vais injecter dans mon UserDetail.roles()
-        System.out.println(rs);
+        System.out.println(rs);  */
+        StringBuilder rolesAvecRol = new StringBuilder();
+       // rolesAvecRol.append("ROLE_").append(role).append(" ");
+// Parcours du tableau des rôles
+        for (int i = 0; i < rolesArray.length; i++) {
+            if (i == 0) {
+                rolesAvecRol.append(rolesArray[i]).append(" ");
+                continue;
+
+            }
+            // Concaténation de "rol" au début de chaque rôle et ajout à la chaîne
+            rolesAvecRol.append("ROLE_").append(rolesArray[i]).append(" ");
+
+        }
+        //rolesAvecRol.deleteCharAt(rolesAvecRol.length() - 1);
+        System.out.println(rolesAvecRol.toString());
 
 
 
@@ -60,7 +76,7 @@ public class UserdDetailsServiceImp implements UserDetailsService {
         return User.builder()
                 .username(client.getEmail())
                 .password(client.getPassword())
-                .roles(rs)
+                .roles(rolesAvecRol.toString())
                 .build();
     }
 }
